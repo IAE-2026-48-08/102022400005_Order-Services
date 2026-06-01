@@ -1,0 +1,24 @@
+type OrderItem {
+  itemId: String!
+  name: String!
+  quantity: Int!
+  price: Float!
+}
+
+type Order {
+  id: ID!
+  customerId: String!
+  items: [OrderItem!]!
+  totalAmount: Float!
+  status: String!
+  createdAt: String!
+}
+
+type Query {
+  orders: [Order!]! @field(resolver: "App\\GraphQL\\Queries\\FulfillmentQuery@orders")
+  order(id: ID!): Order @field(resolver: "App\\GraphQL\\Queries\\FulfillmentQuery@order")
+}
+
+type Mutation {
+  processOrder(orderId: ID!): Order! @field(resolver: "App\\GraphQL\\Mutations\\FulfillmentMutation@processOrder")
+}

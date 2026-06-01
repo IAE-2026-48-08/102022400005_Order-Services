@@ -1,0 +1,145 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Order Service API",
+        "description": "REST & GraphQL API untuk Order Service (Intan) berbasis Laravel 11. Seluruh API diamankan dengan API Key via Request Header X-IAE-KEY.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3000",
+            "description": "Server Lokal (Development)"
+        }
+    ],
+    "paths": {
+        "/api/v1/orders": {
+            "get": {
+                "tags": [
+                    "Order Service"
+                ],
+                "summary": "Melihat daftar semua order (Intan)",
+                "operationId": "2fd056a400bd274a5b2278e92a8ed010",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mendapatkan daftar order."
+                    },
+                    "401": {
+                        "description": "Unauthorized. API Key tidak ditemukan."
+                    },
+                    "403": {
+                        "description": "Forbidden. API Key tidak valid."
+                    }
+                },
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Order Service"
+                ],
+                "summary": "Memproses order ke tahap transaksi setelah stok dipastikan tersedia (Intan)",
+                "operationId": "f92c2f898a00f407e1efa0fd23c93b24",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "orderId"
+                                ],
+                                "properties": {
+                                    "orderId": {
+                                        "type": "string",
+                                        "example": "ORD-001"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Order berhasil diproses ke transaksi."
+                    },
+                    "400": {
+                        "description": "Bad Request. Stok tidak cukup atau status tidak sesuai."
+                    },
+                    "401": {
+                        "description": "Unauthorized."
+                    },
+                    "403": {
+                        "description": "Forbidden."
+                    },
+                    "404": {
+                        "description": "Order tidak ditemukan."
+                    }
+                },
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/orders/{id}": {
+            "get": {
+                "tags": [
+                    "Order Service"
+                ],
+                "summary": "Validasi / Detail order berdasarkan ID (Intan)",
+                "operationId": "d9752171673795b587d678236ac33a2a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Order yang dicari",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "ORD-001"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail order ditemukan."
+                    },
+                    "401": {
+                        "description": "Unauthorized."
+                    },
+                    "403": {
+                        "description": "Forbidden."
+                    },
+                    "404": {
+                        "description": "Order tidak ditemukan."
+                    }
+                },
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "ApiKeyAuth": {
+                "type": "apiKey",
+                "description": "Kunci otentikasi API Key berupa NIM Anda dikirim lewat header X-IAE-KEY (Contoh: 102022400005).",
+                "name": "X-IAE-KEY",
+                "in": "header"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Order Service",
+            "description": "Order Service"
+        }
+    ]
+}
