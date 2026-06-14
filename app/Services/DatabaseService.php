@@ -40,7 +40,7 @@ class DatabaseService
                     'id' => 'ORD-001',
                     'customerId' => 'CUST-INTAN-01',
                     'items' => [
-                        ['itemId' => 'ITEM-001', 'name' => 'Buku Pemrograman JS Modern', 'quantity' => 2, 'price' => 150000]
+                        ['itemId' => 'ITEM-001', 'name' => 'Buku Pemrograman', 'quantity' => 2, 'price' => 150000]
                     ],
                     'totalAmount' => 300000,
                     'status' => 'PENDING', // PENDING, TRANSACTION, FAILED_STOCK_UNAVAILABLE, SHIPPED, DELIVERED
@@ -50,9 +50,9 @@ class DatabaseService
                     'id' => 'ORD-002',
                     'customerId' => 'CUST-INTAN-02',
                     'items' => [
-                        ['itemId' => 'ITEM-002', 'name' => 'Kaos Kaki Gudang Pintar', 'quantity' => 1, 'price' => 25000]
+                        ['itemId' => 'ITEM-002', 'name' => 'Buku Latsol UTBK', 'quantity' => 1, 'price' => 120000]
                     ],
-                    'totalAmount' => 25000,
+                    'totalAmount' => 120000,
                     'status' => 'PENDING',
                     'createdAt' => now()->toIso8601String()
                 ],
@@ -60,9 +60,33 @@ class DatabaseService
                     'id' => 'ORD-003',
                     'customerId' => 'CUST-INTAN-03',
                     'items' => [
-                        ['itemId' => 'ITEM-003', 'name' => 'Laptop ASUS ROG G16', 'quantity' => 5, 'price' => 20000000]
+                        ['itemId' => 'ITEM-003', 'name' => 'Buku Cerita Nabi', 'quantity' => 1, 'price' => 180000]
                     ],
-                    'totalAmount' => 100000000,
+                    'totalAmount' => 180000,
+                    'status' => 'PENDING',
+                    'createdAt' => now()->toIso8601String()
+                ],
+                [
+                    'id' => 'ORD-004',
+                    'customerId' => 'CUST-INTAN-04',
+                    'items' => [
+                        ['itemId' => 'ITEM-004', 'name' => 'Kamus Bahasa Inggris', 'quantity' => 1, 'price' => 150000],
+                        ['itemId' => 'ITEM-005', 'name' => 'Buku Tulis Premium Pack', 'quantity' => 1, 'price' => 100000],
+                        ['itemId' => 'ITEM-006', 'name' => 'Buku Panduan Lolos Tes CPNS', 'quantity' => 1, 'price' => 130000],
+                        ['itemId' => 'ITEM-007', 'name' => 'Novel Matahari - Tere Liye', 'quantity' => 1, 'price' => 120000]
+                    ],
+                    'totalAmount' => 500000,
+                    'status' => 'PENDING',
+                    'createdAt' => now()->toIso8601String()
+                ],
+                [
+                    'id' => 'ORD-005',
+                    'customerId' => 'CUST-INTAN-05',
+                    'items' => [
+                        ['itemId' => 'ITEM-004', 'name' => 'Kamus Bahasa Inggris', 'quantity' => 1, 'price' => 150000],
+                        ['itemId' => 'ITEM-007', 'name' => 'Novel Matahari - Tere Liye', 'quantity' => 1, 'price' => 120000]
+                    ],
+                    'totalAmount' => 270000,
                     'status' => 'PENDING',
                     'createdAt' => now()->toIso8601String()
                 ]
@@ -116,9 +140,9 @@ class DatabaseService
         }
 
         // Ambil konfigurasi service luar
-        $mockEnabled = env('MOCK_EXTERNAL_SERVICES', true);
-        $inventoryUrl = env('INVENTORY_SERVICE_URL', 'http://localhost:3001');
-        $inventoryKey = env('INVENTORY_SERVICE_KEY', 'dhika-nim-gudang-2026');
+        $mockEnabled = config('services.inventory.mock', true);
+        $inventoryUrl = config('services.inventory.url', 'http://localhost:3001');
+        $inventoryKey = config('services.inventory.key', 'dhika-nim-gudang-2026');
 
         // Cek ketersediaan stok untuk semua item di order
         foreach ($order['items'] as $orderItem) {
@@ -126,12 +150,14 @@ class DatabaseService
             $itemName = $orderItem['name'];
 
             if ($mockEnabled) {
-                // SIMULASI MOCK (Pengujian Lokal Standalone Mandiri)
-                // Mensimulasikan stok barang dari data semu Dhika
                 $mockInventories = [
-                    'ITEM-001' => 10, // Buku JS Modern: Stok ada
-                    'ITEM-002' => 0,  // Kaos Kaki: Stok habis
-                    'ITEM-003' => 2,  // Laptop: Stok kurang (butuh 5)
+                    'ITEM-001' => 100,
+                    'ITEM-002' => 50,
+                    'ITEM-003' => 10,
+                    'ITEM-004' => 10,
+                    'ITEM-005' => 50,
+                    'ITEM-006' => 5,
+                    'ITEM-007' => 15,
                 ];
 
                 $stock = isset($mockInventories[$orderItem['itemId']]) ? $mockInventories[$orderItem['itemId']] : 0;

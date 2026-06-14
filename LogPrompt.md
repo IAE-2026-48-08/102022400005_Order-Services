@@ -99,4 +99,3 @@ query untuk graphqlnya bagaimana?
   ]
 }
 ini error bagian apa?
-

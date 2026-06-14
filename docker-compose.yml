@@ -10,3 +10,7 @@ services:
       - APP_KEY=base64:XG8oI6B7F9L2P5v8X2p1B5N8m3K7c1V2g5R8T0L3N1k=
       - API_KEY=102022400005
     restart: always
+    extra_hosts:
+      - "iae-sso.virtualfri.id:103.41.206.192"
+    volumes:
+      - .:/var/www/html

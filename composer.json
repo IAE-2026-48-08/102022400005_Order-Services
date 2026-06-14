@@ -8,6 +8,7 @@
     "require": {
         "php": "^8.3",
         "darkaonline/l5-swagger": "^11.0",
+        "firebase/php-jwt": "^7.0",
         "laravel/framework": "^13.8",
         "laravel/tinker": "^3.0",
         "mll-lab/laravel-graphiql": "^4.1",

@@ -1,0 +1,7 @@
+transaksi yang paling penting menurut saya adalah transaksi order POST /api/v1/orders. karena transaksi order fungsinya untuk memproses status pesanan dari pending menjadi transaction. ketika status pesanan berubah menjadi transaction berarti terjadi kesepakatan transaksi keuangan yang sah. 
+sebelum kesepakatan tersebut disahkan, sistem akan memastikan terlebih dahulu bahwa stok barang di gudang memang benar-benar tersedia, sehingga pembeli tidak membayar barang yang kosong.
+saat stok dipastikan aman, alur transaksi berlanjut ke dua tahap penting secara otomatis:
+
+1. pencatatan audit via SOAP: data pembelian langsung dilaporkan ke sistem audit pusat perusahaan untuk dicatat secara resmi. laporan ini penting agar pembukuan keuangan tercatat secara rapi, transparan, dan menghasilkan nomor resi bukti audit yang sah untuk disimpan di database.
+2. penyebaran informasi via RabbitMQ: setelah proses audit selesai, sistem akan langsung mengirimkan notifikasi ke departemen lain. bagian gudang dan bagian ekspedisi bisa langsung bekerja seketika itu juga tanpa perlu menunggu konfirmasi manual dari bagian penjualan
+sedangkan dua endpoint lainnya, GET /api/v1/orders dan GET /api/v1/orders/{id} tidak dikategorikan sebagai transaksi penting karena hanya digunakan oleh pengguna untuk melihat-lihat atau membaca data pesanan saja, tanpa mengubah status sistem maupun memicu aktivitas fisik di departemen lainnya.

@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\DatabaseService;
+use App\Services\CentralIntegrationService;
 use Exception;
 use OpenApi\Attributes as OA;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
 #[OA\Info(
     version: "1.0.0",
-    description: "REST & GraphQL API untuk Order Service (Intan) berbasis Laravel 11. Seluruh API diamankan dengan API Key via Request Header X-IAE-KEY.",
+    description: "REST & GraphQL API untuk Order Service (Intan) berbasis Laravel 11. Seluruh API diamankan dengan API Key via Request Header X-IAE-KEY / Authorization Bearer.",
     title: "Order Service API"
 )]
 #[OA\Server(
@@ -23,8 +26,24 @@ use OpenApi\Attributes as OA;
     in: "header",
     description: "Kunci otentikasi API Key berupa NIM Anda dikirim lewat header X-IAE-KEY (Contoh: 102022400005)."
 )]
-class OrderController extends Controller
+#[OA\SecurityScheme(
+    securityScheme: "BearerAuth",
+    type: "http",
+    scheme: "bearer",
+    bearerFormat: "JWT",
+    description: "Token JWT SSO Dosen dikirim lewat header Authorization Bearer."
+)]
+class OrderController extends Controller implements HasMiddleware
 {
+    // Registrasi middleware standar Laravel 11
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('jwt.sso', only: ['store']),
+            new Middleware('api.key', except: ['store']),
+        ];
+    }
+
     #[OA\Get(
         path: "/api/v1/orders",
         summary: "Melihat daftar semua order (Intan)",
@@ -111,7 +130,7 @@ class OrderController extends Controller
     #[OA\Post(
         path: "/api/v1/orders",
         summary: "Memproses order ke tahap transaksi setelah stok dipastikan tersedia (Intan)",
-        security: [["ApiKeyAuth" => []]],
+        security: [["BearerAuth" => []]],
         tags: ["Order Service"]
     )]
     #[OA\RequestBody(
@@ -144,20 +163,63 @@ class OrderController extends Controller
         }
 
         try {
+            $order = DatabaseService::getOrderById($orderId);
+            if (!$order) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Order dengan ID {$orderId} tidak ditemukan.",
+                    'errors' => null
+                ], 404);
+            }
+
+            // 1. Cek ketersediaan stok & ubah status ke TRANSACTION
             $updatedOrder = DatabaseService::processOrderToTransaction($orderId);
+
+            // 2. FASE MODUL 2: Kirim SOAP XML Audit Log & Simpan ReceiptNumber
+            $receiptNumber = CentralIntegrationService::sendSoapAudit($orderId, $updatedOrder);
+
+            // Simpan ReceiptNumber secara lokal (memperbarui state database)
+            $state = DatabaseService::getState();
+            foreach ($state['orders'] as &$o) {
+                if ($o['id'] === $orderId) {
+                    $o['status'] = 'TRANSACTION';
+                    $o['receipt_number'] = $receiptNumber;
+                    break;
+                }
+            }
+            DatabaseService::saveState($state);
+            $updatedOrder['receipt_number'] = $receiptNumber;
+
+            // 3. FASE MODUL 3: Kirim Event Notification ke RabbitMQ Dosen
+            CentralIntegrationService::publishAmqpEvent('order.processed', [
+                'event' => 'order.processed',
+                'timestamp' => now()->toIso8601String(),
+                'data' => [
+                    'id' => $orderId,
+                    'status' => 'TRANSACTION',
+                    'receipt_number' => $receiptNumber,
+                    'total_amount' => $updatedOrder['totalAmount'],
+                    'customer_id' => $updatedOrder['customerId'] ?? null,
+                    'items' => $updatedOrder['items'] ?? [],
+                    'created_at' => $updatedOrder['createdAt'] ?? null
+                ]
+            ]);
+
+            // 4. Kirim Respon Sukses (Standard Integration Contract)
             return response()->json([
                 'status' => 'success',
-                'message' => "Operation successful. Order {$orderId} berhasil dilanjutkan ke tahap transaksi. Stok barang berhasil dikurangi.",
+                'message' => "Operation successful. SOAP audit tercatat dengan Receipt: {$receiptNumber} dan Event disebarkan ke RabbitMQ.",
                 'data' => $updatedOrder,
                 'meta' => [
                     'service_name' => 'Order-Service',
                     'api_version' => 'v1'
                 ]
             ], 200);
+
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage(),
+                'message' => 'Gagal memproses transaksi: ' . $e->getMessage(),
                 'errors' => null
             ], 400);
         }

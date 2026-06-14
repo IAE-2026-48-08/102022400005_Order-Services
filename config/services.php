@@ -35,4 +35,15 @@ return [
         ],
     ],
 
+    'central' => [
+        'api_key' => env('CENTRAL_API_KEY', 'KEY-MHS-50'),
+        'api_key_local' => env('API_KEY', '102022400005'),
+    ],
+
+    'inventory' => [
+        'mock' => env('MOCK_EXTERNAL_SERVICES', true),
+        'url' => env('INVENTORY_SERVICE_URL', 'http://localhost:3001'),
+        'key' => env('INVENTORY_SERVICE_KEY', 'dhika-nim-gudang-2026'),
+    ],
+
 ];

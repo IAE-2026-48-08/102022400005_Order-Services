@@ -16,8 +16,7 @@ class ApiKeyMiddleware
         // Mendapatkan API Key dari Request Header (case-insensitive)
         $apiKey = $request->header('X-IAE-KEY') ?: $request->header('x-iae-key');
         
-        // Membaca NIM pemilik servis dari environment variables (.env)
-        $expectedKey = env('API_KEY', 'fulfillment-secret-key-2026');
+        $expectedKey = config('services.central.api_key_local', '102022400005');
 
         if (!$apiKey) {
             return response()->json([

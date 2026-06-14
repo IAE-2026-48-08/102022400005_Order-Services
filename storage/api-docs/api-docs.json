@@ -2,7 +2,7 @@
     "openapi": "3.0.0",
     "info": {
         "title": "Order Service API",
-        "description": "REST & GraphQL API untuk Order Service (Intan) berbasis Laravel 11. Seluruh API diamankan dengan API Key via Request Header X-IAE-KEY.",
+        "description": "REST & GraphQL API untuk Order Service (Intan) berbasis Laravel 11. Seluruh API diamankan dengan API Key via Request Header X-IAE-KEY / Authorization Bearer.",
         "version": "1.0.0"
     },
     "servers": [
@@ -80,7 +80,7 @@
                 },
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "BearerAuth": []
                     }
                 ]
             }
@@ -133,6 +133,12 @@
                 "description": "Kunci otentikasi API Key berupa NIM Anda dikirim lewat header X-IAE-KEY (Contoh: 102022400005).",
                 "name": "X-IAE-KEY",
                 "in": "header"
+            },
+            "BearerAuth": {
+                "type": "http",
+                "description": "Token JWT SSO Dosen dikirim lewat header Authorization Bearer.",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
             }
         }
     },
