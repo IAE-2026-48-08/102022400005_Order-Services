@@ -19,9 +19,14 @@ class JwtSsoMiddleware
 
         if (!$authorization || !str_starts_with($authorization, 'Bearer ')) {
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'Unauthorized: Token JWT tidak ditemukan pada header Authorization.',
-                'errors' => null
+                'data'    => null,
+                'errors'  => null,
+                'meta'    => [
+                    'service_name' => 'Order-Service',
+                    'api_version'  => 'v1'
+                ]
             ], 401);
         }
 
@@ -83,9 +88,14 @@ class JwtSsoMiddleware
             return $next($request);
         } catch (Exception $e) {
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'Unauthorized: Token JWT tidak valid atau kedaluwarsa. ' . $e->getMessage(),
-                'errors' => null
+                'data'    => null,
+                'errors'  => null,
+                'meta'    => [
+                    'service_name' => 'Order-Service',
+                    'api_version'  => 'v1'
+                ]
             ], 401);
         }
     }

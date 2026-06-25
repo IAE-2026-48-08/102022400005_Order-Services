@@ -214,7 +214,7 @@ class OrderController extends Controller implements HasMiddleware
                     'service_name' => 'Order-Service',
                     'api_version' => 'v1'
                 ]
-            ], 200);
+            ], 201);
 
         } catch (Exception $e) {
             return response()->json([

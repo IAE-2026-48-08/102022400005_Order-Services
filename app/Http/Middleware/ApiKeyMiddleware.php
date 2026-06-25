@@ -20,17 +20,27 @@ class ApiKeyMiddleware
 
         if (!$apiKey) {
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'Unauthorized: API Key tidak ditemukan pada Request Header (gunakan header X-IAE-KEY).',
-                'errors' => null
+                'data'    => null,
+                'errors'  => null,
+                'meta'    => [
+                    'service_name' => 'Order-Service',
+                    'api_version'  => 'v1'
+                ]
             ], 401);
         }
 
         if ($apiKey !== $expectedKey) {
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'Forbidden: API Key tidak valid.',
-                'errors' => null
+                'data'    => null,
+                'errors'  => null,
+                'meta'    => [
+                    'service_name' => 'Order-Service',
+                    'api_version'  => 'v1'
+                ]
             ], 403);
         }
 
